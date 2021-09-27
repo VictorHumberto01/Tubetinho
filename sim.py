@@ -134,4 +134,4 @@ async def next(ctx):
 
 
 
-client.run('ODg4NjIzNDE0NzEyMDk4ODg2.YUVZCw.zglIEBvmA17G6YgEFLVqYHss9TE')
+client.run('TOKEN')
