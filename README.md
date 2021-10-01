@@ -1,6 +1,4 @@
 bot do tubetinho
-
-
 COMANDOS:
 
 +join - faz o bot entrar no canal que o usuário está.
