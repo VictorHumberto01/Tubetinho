@@ -3,8 +3,6 @@ import discord
 from discord.ext import commands
 import youtube_dl
 
-# Prefixo do bot
-
 client = commands.Bot(command_prefix='+')
 
 youtube_dl.utils.bug_reports_message = lambda: ''
@@ -52,14 +50,17 @@ class YTDLSource(discord.PCMVolumeTransformer):
         return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
 
 
-status = ['Assistindo animes!']
 queue = []
 
 
 @client.command(name='play', help='This command plays songs')
 async def play(ctx: object) -> object:
-    global queue
+    voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
+    channel = ctx.message.author.voice.channel
+    if voice is None:
+        await channel.connect()
 
+    global queue
     server = ctx.message.guild
     voice_channel = server.voice_client
 
@@ -70,6 +71,13 @@ async def play(ctx: object) -> object:
     await ctx.send('**Tocando agora:** {}'.format(player.title))
     del (queue[0])
 
+    if voice.is_connected():
+        async with ctx.typing():
+            player = await YTDLSource.from_url(queue[0], loop=client.loop)
+            voice_channel.play(player, after=lambda e: print('Erro: %s' % e) if e else None)
+
+        await ctx.send('**Tocando agora:** {}'.format(player.title))
+        del (queue[0])
 
 @client.command()
 async def leave(ctx):
@@ -111,18 +119,6 @@ async def remove(ctx, number):
     except:
         await ctx.send('A fila esta vazia!')
 
-
-@client.command(name='join')
-async def join(ctx):
-    if not ctx.message.author.voice:
-        await ctx.send('Você precisa estar conectado à algum canal para usar este comando!')
-        return
-
-    else:
-        channel = ctx.message.author.voice.channel
-
-        await channel.connect()
-
 @client.command()
 async def ninfetinha(ctx):
     await ctx.send('Gustavo, eu sei que você está na puberdade mas eu sou apenas um bot, por favor mantenha isso somente para você.')
@@ -134,4 +130,27 @@ async def next(ctx):
 
 
 
+
+
+
+@commands.Cog.listener()
+async def on_voice_state_update(self, member, before, after):
+    if not member.id == self.bot.user.id:
+        return
+
+    elif before.channel is None:
+        voice = after.channel.guild.voice_client
+        time = 0
+        while True:
+            await asyncio.sleep(1)
+            time = time + 1
+            if voice.is_playing() and not voice.is_paused():
+                time = 0
+            if time == 600:
+                await voice.disconnect()
+            if not voice.is_connected():
+                break
+
+
 client.run('TOKEN')
+
