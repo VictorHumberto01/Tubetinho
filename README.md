@@ -1,4 +1,3 @@
-bot do tubetinho
 COMANDOS:
 
 +queue - adiciona musicas na fila.
