@@ -1,13 +1,14 @@
 import asyncio
 import discord
 from discord.ext import commands
-import youtube_dl
+import yt_dlp
 
+#Prefixo do bot
 client = commands.Bot(command_prefix='+')
 
-youtube_dl.utils.bug_reports_message = lambda: ''
+yt_dlp.utils.bug_reports_message = lambda: ''
 
-ytdl_format_options = {
+yt_dlp_format_options = {
     'format': 'bestaudio/best',
     'outtmpl': '%(extractor)s-%(id)s-%(title)s.%(ext)s',
     'restrictfilenames': True,
@@ -25,7 +26,7 @@ ffmpeg_options = {
     'options': '-vn'
 }
 
-ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
+ytdl = yt_dlp.YoutubeDL(yt_dlp_format_options)
 
 
 class YTDLSource(discord.PCMVolumeTransformer):
@@ -43,7 +44,6 @@ class YTDLSource(discord.PCMVolumeTransformer):
         data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream))
 
         if 'entries' in data:
-            # take first item from a playlist
             data = data['entries'][0]
 
         filename = data['url'] if stream else ytdl.prepare_filename(data)
@@ -51,7 +51,6 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
 
 queue = []
-
 
 @client.command(name='play', help='This command plays songs')
 async def play(ctx: object) -> object:
@@ -134,7 +133,7 @@ async def next(ctx):
 
 
 @commands.Cog.listener()
-async def on_voice_state_update(self, member, before, after):
+async def on_voice_state_update(self, member, before, after, ctx):
     if not member.id == self.bot.user.id:
         return
 
@@ -148,8 +147,10 @@ async def on_voice_state_update(self, member, before, after):
                 time = 0
             if time == 600:
                 await voice.disconnect()
+                await ctx.send('**Me desconectei do canal por conta de inatividade.**')
             if not voice.is_connected():
                 break
+
 
 
 client.run('TOKEN')
