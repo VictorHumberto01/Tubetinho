@@ -100,6 +100,7 @@ async def queue_(ctx, url):
     await ctx.send(f'`{url}` adicionado à fila!')
 
 
+
 @client.command()
 async def skip(ctx):
     await stop(ctx)
