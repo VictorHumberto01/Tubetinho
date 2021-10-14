@@ -52,7 +52,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
 queue = []
 
-@client.command(name='play', help='This command plays songs')
+@client.command()
 async def play(ctx: object) -> object:
     voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
     channel = ctx.message.author.voice.channel
@@ -117,19 +117,11 @@ async def remove(ctx, number):
 
     except:
         await ctx.send('A fila esta vazia!')
-
-@client.command()
-async def ninfetinha(ctx):
-    await ctx.send('Gustavo, eu sei que você está na puberdade mas eu sou apenas um bot, por favor mantenha isso somente para você.')
-    await ctx.send('Assinado: **Tubetinho**')
+        
 
 @client.command()
 async def next(ctx):
     await ctx.send('**Para pular use o comando skip!.**')
-
-
-
-
 
 
 @commands.Cog.listener()
