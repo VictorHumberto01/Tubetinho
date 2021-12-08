@@ -1,9 +1,10 @@
 import asyncio
 import discord
-from discord.ext import commands
 import yt_dlp
+import files
+from discord.ext import commands
 
-#Prefixo do bot
+# Change the + to your choice if want
 client = commands.Bot(command_prefix='+')
 
 yt_dlp.utils.bug_reports_message = lambda: ''
@@ -52,12 +53,14 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
 queue = []
 
+#Isn't the best way to do it but its working
 @client.command()
 async def play(ctx: object) -> object:
     voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
     channel = ctx.message.author.voice.channel
     if voice is None:
         await channel.connect()
+        files
 
     global queue
     server = ctx.message.guild
@@ -78,6 +81,8 @@ async def play(ctx: object) -> object:
         await ctx.send('**Tocando agora:** {}'.format(player.title))
         del (queue[0])
 
+
+
 @client.command()
 async def leave(ctx):
     voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
@@ -85,6 +90,7 @@ async def leave(ctx):
         await voice.disconnect()
     else:
         await ctx.send('Eu não estou conectado a nenhum canal')
+
 
 @client.command()
 async def stop(ctx):
@@ -99,8 +105,6 @@ async def queue_(ctx, url):
     queue.append(url)
     await ctx.send(f'`{url}` adicionado à fila!')
 
-
-
 @client.command()
 async def skip(ctx):
     await stop(ctx)
@@ -109,29 +113,25 @@ async def skip(ctx):
 
 
 @client.command()
-async def remove(ctx, number):
-    global queue
+async def ninfetinha(ctx):
+    await ctx.send(
+        'Gustavo, eu sei que você está na puberdade mas eu sou apenas um bot, por favor mantenha isso somente para você.')
+    await ctx.send('Assinado: **Tubetinho**')
 
-    try:
-        del (queue[int(number)])
-        await ctx.send(f'Sua fila agora está `{queue}!`')
-
-    except:
-        await ctx.send('A fila esta vazia!')
-        
 
 @client.command()
 async def next(ctx):
-    await ctx.send('**Para pular use o comando skip!.**')
+    await ctx.send('**Para pular use o comando skip!**')
 
 
-@commands.Cog.listener()
+# Not working gonna fix later.
 async def on_voice_state_update(self, member, before, after, ctx):
+    voice = after.channel.guild.voice_client
     if not member.id == self.bot.user.id:
-        return
+        await voice.disconnect()
+        await ctx.send('**O canal estava vazio por isso me desconectei.**')
 
     elif before.channel is None:
-        voice = after.channel.guild.voice_client
         time = 0
         while True:
             await asyncio.sleep(1)
