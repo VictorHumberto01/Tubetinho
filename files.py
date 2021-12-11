@@ -10,4 +10,4 @@ for item in X:
     if item.endswith('.mp3'):
         os.remove(item)
         
-# This script removes the old music files from the bot directory. It's necessary to change the directory on the 3rd line.
+# This script removes the old music files from the bot directory. It's necessary to change the path on the 3rd line.
