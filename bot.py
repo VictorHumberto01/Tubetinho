@@ -4,7 +4,7 @@ import yt_dlp
 import files
 from discord.ext import commands
 
-# Change the + to your choice if want
+# Change the + to your choice if you want
 client = commands.Bot(command_prefix='+')
 
 yt_dlp.utils.bug_reports_message = lambda: ''
