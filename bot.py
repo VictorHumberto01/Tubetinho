@@ -153,4 +153,4 @@ async def on_voice_state_update(self, member, before, after, ctx):
                 break
 
 
-client.run('ODg4NjIzNDE0NzEyMDk4ODg2.GYwLif.qxlA1FUUvJe4ZhwUkX8hzLEOruNQ16_Yp6vt8g')
+client.run('TOKEN')
