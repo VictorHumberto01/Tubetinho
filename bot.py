@@ -11,6 +11,9 @@ client = commands.Bot(command_prefix='+', intents=discord.Intents.all(), case_in
 
 yt_dlp.utils.bug_reports_message = lambda: ''
 
+
+# yt_dlp parameters
+
 yt_dlp_format_options = {
     'format': 'bestaudio/best',
     'outtmpl': '%(extractor)s-%(id)s-%(title)s.%(ext)s',
@@ -55,43 +58,38 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
 queue = []
 
-#Isn't the best way to do it but its working
+#Play command
 @client.command()
 async def play(ctx: object, url) -> object:
     voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
+    
+    # Connects to the user channel if not connected to other channel
     channel = ctx.message.author.voice.channel
-
     if voice is None:
         await channel.connect()
         files
 
+    # Uses the url parameter to add the music to the queue
     global queue
-    queue.append(url)
+
+    #checks if the url it's in the queue if not will add it
+    if url not in queue:
+        queue.append(url)
     server = ctx.message.guild
     voice_channel = server.voice_client
 
+    # Will try to play the music with the parameters above
+    # If can't send a message to the user chat
     try:
         async with ctx.typing():
             player = await YTDLSource.from_url(queue[0], loop=client.loop)
-            voice_channel.play(player, after=lambda e: print('Erro: %s' % e) if e else None)
+            voice_channel.play(player, after=lambda e: print('Error: %s' % e) if e else None)
 
             await ctx.send('**Tocando agora:** {}'.format(player.title))
-            del (queue[0])
-    
-    except:
-        url = queue[0]
-        await ctx.send('**Adicionei a música na fila!**')
-        queue.append(url)
-        del (queue[0])
-
-
-    if voice.is_connected():
-        async with ctx.typing():
-            player = await YTDLSource.from_url(queue[0], loop=client.loop)
-            voice_channel.play(player, after=lambda e: print('Erro: %s' % e) if e else None)
-
-        await ctx.send('**Tocando agora:** {}'.format(player.title))
-        del (queue[0])
+            del queue[0]
+        
+    except Exception as e:
+        await ctx.send('**Adicionei a música na lista!**')
 
 
 
@@ -122,34 +120,27 @@ async def skip(ctx):
     await stop(ctx)
     url = queue[0]
     await play(ctx, url)
-    print(queue)
+
+
+
+#Command used to diagnostics in the queue
+#Uncomment with you want to use it
+
+#@client.command()
+#async def status(ctx):
+#    print(queue)
+#    print(len(queue))
+#    print(queue[0])
 
 
 
 @client.command()
 async def next(ctx):
-    await ctx.send('**Para pular use o comando skip!**')
+    await stop(ctx)
+    url = queue[0]
+    await play(ctx, url)
 
 
-# Not working gonna fix later.
-async def on_voice_state_update(self, member, before, after, ctx):
-    voice = after.channel.guild.voice_client
-    if not member.id == self.bot.user.id:
-        await voice.disconnect()
-        await ctx.send('**O canal estava vazio por isso me desconectei.**')
-
-    elif before.channel is None:
-        time = 0
-        while True:
-            await asyncio.sleep(1)
-            time = time + 1
-            if voice.is_playing() and not voice.is_paused():
-                time = 0
-            if time == 600:
-                await voice.disconnect()
-                await ctx.send('**Me desconectei do canal por conta de inatividade.**')
-            if not voice.is_connected():
-                break
-
-
+# Copy your bot token in the parentesis
+# Do no remove the ''
 client.run('TOKEN')
