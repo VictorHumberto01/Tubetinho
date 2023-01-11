@@ -117,15 +117,12 @@ async def stop(ctx):
 
 
 @client.command(name='queue')
-async def queue_(ctx, url):
-    global queue
-
-    try:
-        if url == 'clear':
-            queue = []
-            await ctx.send('**Limpei a fila!**')
-    except Exception as e:
-        await ctx.send(queue)
+async def queue_(ctx):
+    if len(queue) == 1:
+        await ctx.send('**Tem {} música na fila!**'.format(len(queue)))
+    else:
+        await ctx.send('**Tem {} músicas na fila!**'.format(len(queue)))
+    await ctx.send('Se quiser limpar a fila use o comando +clear.')
 
 @client.command()
 async def skip(ctx):
@@ -136,8 +133,12 @@ async def skip(ctx):
     except IndexError:
         await ctx.send('**Não tem nenhuma musica na fila!**')
 
-
-
+@client.command()
+async def clear(ctx):
+    global queue
+    await ctx.send('**Limpei a fila!**')
+    queue = []
+    
 #Command used to diagnostics in the queue
 #Uncomment with you want to use it
 
