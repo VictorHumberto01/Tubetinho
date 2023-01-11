@@ -72,11 +72,19 @@ async def play(ctx: object, url) -> object:
     # Uses the url parameter to add the music to the queue
     global queue
 
+    
+    
+    
     #checks if the url it's in the queue if not will add it
-    if url not in queue:
-        queue.append(url)
-    server = ctx.message.guild
-    voice_channel = server.voice_client
+    try:
+        if url not in queue:
+            queue.append(url)
+        server = ctx.message.guild
+        voice_channel = server.voice_client
+    except IndexError:
+        if queue == []:
+            await ctx.send('**Não tem nenhuma musica na fila!**')
+
 
     # Will try to play the music with the parameters above
     # If can't send a message to the user chat
@@ -112,14 +120,21 @@ async def stop(ctx):
 async def queue_(ctx, url):
     global queue
 
-    queue.append(url)
-    await ctx.send(f'`{url}` adicionado à fila!')
+    try:
+        if url == 'clear':
+            queue = []
+            await ctx.send('**Limpei a fila!**')
+    except Exception as e:
+        await ctx.send(queue)
 
 @client.command()
 async def skip(ctx):
     await stop(ctx)
-    url = queue[0]
-    await play(ctx, url)
+    try:
+        url = queue[0]
+        await play(ctx, url)
+    except IndexError:
+        await ctx.send('**Não tem nenhuma musica na fila!**')
 
 
 
