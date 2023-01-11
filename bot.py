@@ -81,7 +81,6 @@ async def play(ctx: object, url) -> object:
     except:
         url = queue[0]
         await ctx.send('**Adicionei a música na fila!**')
-        print('test')
         queue.append(url)
         del (queue[0])
 
