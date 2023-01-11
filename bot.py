@@ -3,9 +3,11 @@ import discord
 import yt_dlp
 import files
 from discord.ext import commands
+# Imported all the components needed to make the bot work. The files one is the side script
+# used to delete the used files and keep the bot folder clean.
 
-# Change the + to your choice if you want
-client = commands.Bot(command_prefix='+')
+# Change the '+' to your choice if you want
+client = commands.Bot(command_prefix='+', intents=discord.Intents.all(), case_insensitive=True, self_bot=True)
 
 yt_dlp.utils.bug_reports_message = lambda: ''
 
@@ -55,23 +57,34 @@ queue = []
 
 #Isn't the best way to do it but its working
 @client.command()
-async def play(ctx: object) -> object:
+async def play(ctx: object, url) -> object:
     voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
     channel = ctx.message.author.voice.channel
+
     if voice is None:
         await channel.connect()
         files
 
     global queue
+    queue.append(url)
     server = ctx.message.guild
     voice_channel = server.voice_client
 
-    async with ctx.typing():
-        player = await YTDLSource.from_url(queue[0], loop=client.loop)
-        voice_channel.play(player, after=lambda e: print('Erro: %s' % e) if e else None)
+    try:
+        async with ctx.typing():
+            player = await YTDLSource.from_url(queue[0], loop=client.loop)
+            voice_channel.play(player, after=lambda e: print('Erro: %s' % e) if e else None)
 
-    await ctx.send('**Tocando agora:** {}'.format(player.title))
-    del (queue[0])
+            await ctx.send('**Tocando agora:** {}'.format(player.title))
+            del (queue[0])
+    
+    except:
+        url = queue[0]
+        await ctx.send('**Adicionei a música na fila!**')
+        print('test')
+        queue.append(url)
+        del (queue[0])
+
 
     if voice.is_connected():
         async with ctx.typing():
@@ -108,15 +121,10 @@ async def queue_(ctx, url):
 @client.command()
 async def skip(ctx):
     await stop(ctx)
-    await play(ctx)
+    url = queue[0]
+    await play(ctx, url)
+    print(queue)
 
-
-
-@client.command()
-async def ninfetinha(ctx):
-    await ctx.send(
-        'Gustavo, eu sei que você está na puberdade mas eu sou apenas um bot, por favor mantenha isso somente para você.')
-    await ctx.send('Assinado: **Tubetinho**')
 
 
 @client.command()
@@ -145,6 +153,4 @@ async def on_voice_state_update(self, member, before, after, ctx):
                 break
 
 
-
-client.run('TOKEN')
-
+client.run('ODg4NjIzNDE0NzEyMDk4ODg2.GYwLif.qxlA1FUUvJe4ZhwUkX8hzLEOruNQ16_Yp6vt8g')
