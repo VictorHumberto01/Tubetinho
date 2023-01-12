@@ -156,6 +156,16 @@ async def next(ctx):
     url = queue[0]
     await play(ctx, url)
 
+@client.event
+async def on_voice_state_update(member, before, after):
+    if member.bot:
+        return
+    if before.channel is None and after.channel is not None:
+        return
+    if before.channel is not None and after.channel is None:
+        voice_client = discord.utils.get(client.voice_clients, guild=member.guild)
+        if voice_client is not None and len(before.channel.members) == 1:
+            await voice_client.disconnect()
 
 # Copy your bot token in the parentesis
 # Do no remove the ''
