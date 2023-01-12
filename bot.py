@@ -3,6 +3,9 @@ import discord
 import yt_dlp
 import files
 from discord.ext import commands
+from youtube_search import YoutubeSearch
+import re
+
 # Imported all the components needed to make the bot work. The files one is the side script
 # used to delete the used files and keep the bot folder clean.
 
@@ -34,6 +37,13 @@ ffmpeg_options = {
 
 ytdl = yt_dlp.YoutubeDL(yt_dlp_format_options)
 
+def search_and_get_url(title):
+    results = YoutubeSearch(title , max_results=1).to_dict()
+    for v in results:
+        h = ('https://www.youtube.com' + v['url_suffix'])
+        return h
+
+
 
 class YTDLSource(discord.PCMVolumeTransformer):
     def __init__(self, source, *, data, volume=0.5):
@@ -55,26 +65,48 @@ class YTDLSource(discord.PCMVolumeTransformer):
         filename = data['url'] if stream else ytdl.prepare_filename(data)
         return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
 
-
+global channelstate
+global userchannel
+channelstate = False
+userchannel = ()
 queue = []
 
 #Play command
 @client.command()
-async def play(ctx: object, url) -> object:
+async def play(ctx: object, *, query: str):
+    global channelstate
+    global userchannel
+    if channelstate == True:
+        if ctx.author.voice.channel != userchannel:
+            await ctx.send("**Você precisa estar no mesmo canal que o bot para usar esse comando!**")
+            return
+    else:
+        pass
+    #Check if the query is a valid URL
+    match = re.match("https?://(www\.)?youtube\.com/watch\?v=\S+", query)
+    try:
+        if match:
+            url = query
+        else:
+            url = search_and_get_url(query)  
+    except TypeError:
+        await ctx.send('**Não consegui tocar a sua música.**')  
+        
+        
+        
     voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
-    
+        
     # Connects to the user channel if not connected to other channel
-    channel = ctx.message.author.voice.channel
+    channel = ctx.author.voice.channel
     if voice is None:
         await channel.connect()
+        userchannel = channel
         files
 
-    # Uses the url parameter to add the music to the queue
-    global queue
-
-    
-    
-    
+            
+        
+        
+        
     #checks if the url it's in the queue if not will add it
     try:
         if url not in queue:
@@ -95,29 +127,65 @@ async def play(ctx: object, url) -> object:
 
             await ctx.send('**Tocando agora:** {}'.format(player.title))
             del queue[0]
-        
+            channelstate = True
+
     except Exception as e:
         await ctx.send('**Adicionei a música na fila!**')
+    
+    
 
 
 
 @client.command()
 async def leave(ctx):
+    global channelstate
+    global userchannel
+    
+    if channelstate == True:
+        if ctx.author.voice.channel != userchannel:
+            await ctx.send("**Você precisa estar no mesmo canal que o bot para usar esse comando!**")
+            return
+    else:
+        pass
+
     voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
+    
+    
+    
     if voice.is_connected():
         await voice.disconnect()
+        channelstate = False
+        userchannel = ()
     else:
         await ctx.send('Eu não estou conectado a nenhum canal')
 
 
 @client.command()
 async def stop(ctx):
+    global channelstate
+    global userchannel
+    
+    if channelstate == True:
+        if ctx.author.voice.channel != userchannel:
+            await ctx.send("**Você precisa estar no mesmo canal que o bot para usar esse comando!**")
+            return
+    else:
+        pass
     voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
     voice.stop()
 
 
 @client.command(name='queue')
 async def queue_(ctx):
+    global channelstate
+    global userchannel
+    
+    if channelstate == True:
+        if ctx.author.voice.channel != userchannel:
+            await ctx.send("**Você precisa estar no mesmo canal que o bot para usar esse comando!**")
+            return
+    else:
+        pass
     if len(queue) == 1:
         await ctx.send('**Tem {} música na fila!**'.format(len(queue)))
     else:
@@ -126,10 +194,20 @@ async def queue_(ctx):
 
 @client.command()
 async def skip(ctx):
+    global channelstate
+    global userchannel
+    
+    if channelstate == True:
+        if ctx.author.voice.channel != userchannel:
+            await ctx.send("**Você precisa estar no mesmo canal que o bot para usar esse comando!**")
+            return
+    else:
+        pass
+
     await stop(ctx)
     try:
-        url = queue[0]
-        await play(ctx, url)
+        query = queue[0]
+        await play(ctx, query=query)
     except IndexError:
         await ctx.send('**Não tem nenhuma musica na fila!**')
 
@@ -142,19 +220,32 @@ async def clear(ctx):
 #Command used to diagnostics in the queue
 #Uncomment with you want to use it
 
-#@client.command()
-#async def status(ctx):
-#    print(queue)
-#    print(len(queue))
-#    print(queue[0])
+@client.command()
+async def status(ctx):
+    print(queue)
+    print(len(queue))
+    print(queue[0])
 
 
 
 @client.command()
 async def next(ctx):
+    global channelstate
+    global userchannel
+    
+    if channelstate == True:
+        if ctx.author.voice.channel != userchannel:
+            await ctx.send("**Você precisa estar no mesmo canal que o bot para usar esse comando!**")
+            return
+    else:
+        pass
+
     await stop(ctx)
-    url = queue[0]
-    await play(ctx, url)
+    try:
+        query = queue[0]
+        await play(ctx, query=query)
+    except IndexError:
+        await ctx.send('**Não tem nenhuma musica na fila!**')
 
 
 #Add a function that makes the bot exit a channel if it's alone.
