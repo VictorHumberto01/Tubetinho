@@ -156,6 +156,8 @@ async def next(ctx):
     url = queue[0]
     await play(ctx, url)
 
+
+#Add a function that makes the bot exit a channel if it's alone.
 @client.event
 async def on_voice_state_update(member, before, after):
     if member.bot:
