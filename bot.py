@@ -97,7 +97,7 @@ async def play(ctx: object, url) -> object:
             del queue[0]
         
     except Exception as e:
-        await ctx.send('**Adicionei a música na lista!**')
+        await ctx.send('**Adicionei a música na fila!**')
 
 
 
