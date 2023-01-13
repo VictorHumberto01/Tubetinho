@@ -9,8 +9,8 @@ import re
 # Imported all the components needed to make the bot work. The files one is the side script
 # used to delete the used files and keep the bot folder clean.
 
-# Change the '+' to your choice if you want
-client = commands.Bot(command_prefix='+', intents=discord.Intents.all(), case_insensitive=True, self_bot=True)
+#
+bot = discord.Bot()
 
 yt_dlp.utils.bug_reports_message = lambda: ''
 
@@ -66,19 +66,22 @@ class YTDLSource(discord.PCMVolumeTransformer):
         return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
 
 global channelstate
+global voice_channel
 global userchannel
 channelstate = False
+voice_channel = ''
+playing = False
 userchannel = ()
 queue = []
 
 #Play command
-@client.command()
+@bot.command(description='Toca uma música')
 async def play(ctx: object, *, query: str):
     global channelstate
     global userchannel
+    global playing
     if channelstate == True:
         if ctx.author.voice.channel != userchannel:
-            await ctx.send("**Você precisa estar no mesmo canal que o bot para usar esse comando!**")
             return
     else:
         pass
@@ -87,68 +90,68 @@ async def play(ctx: object, *, query: str):
     try:
         if match:
             url = query
+            pass
         else:
             url = search_and_get_url(query)  
+            pass
     except TypeError:
         await ctx.send('**Não consegui tocar a sua música.**')  
         
         
         
-    voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
+    voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
         
     # Connects to the user channel if not connected to other channel
     channel = ctx.author.voice.channel
-    if voice is None:
+    if channelstate == False:
         await channel.connect()
         userchannel = channel
+        channelstate == True
         files
+    else:
+        pass
 
-            
-        
-        
-        
     #checks if the url it's in the queue if not will add it
     try:
         if url not in queue:
             queue.append(url)
-        server = ctx.message.guild
-        voice_channel = server.voice_client
     except IndexError:
         if queue == []:
-            await ctx.send('**Não tem nenhuma musica na fila!**')
+            await ctx.respond('**Não tem nenhuma musica na fila!**')
 
 
     # Will try to play the music with the parameters above
     # If can't send a message to the user chat
     try:
-        async with ctx.typing():
-            player = await YTDLSource.from_url(queue[0], loop=client.loop)
-            voice_channel.play(player, after=lambda e: print('Error: %s' % e) if e else None)
+        global player
+        server = ctx.guild
+        voice_channel = server.voice_client
+        player = await YTDLSource.from_url(queue[0], loop=bot.loop)
+        voice_channel.play(player, after=lambda e: print('Error: %s' % e))
 
-            await ctx.send('**Tocando agora:** {}'.format(player.title))
-            del queue[0]
-            channelstate = True
-
+        await ctx.respond('**Tocando agora:** {}'.format(player.title))
+        del queue[0]
+        channelstate = True
     except Exception as e:
-        await ctx.send('**Adicionei a música na fila!**')
+        await ctx.respond('**Coloquei a música na fila!**')
+        
+            
     
-    
 
 
 
-@client.command()
+@bot.command(description='Remove o bot da call')
 async def leave(ctx):
     global channelstate
     global userchannel
     
     if channelstate == True:
         if ctx.author.voice.channel != userchannel:
-            await ctx.send("**Você precisa estar no mesmo canal que o bot para usar esse comando!**")
             return
     else:
         pass
 
-    voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
+    voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
     
     
     
@@ -157,109 +160,88 @@ async def leave(ctx):
         channelstate = False
         userchannel = ()
     else:
-        await ctx.send('Eu não estou conectado a nenhum canal')
+        await ctx.respond('Eu não estou conectado a nenhum canal')
 
 
-@client.command()
+@bot.command(description='Para a música')
 async def stop(ctx):
     global channelstate
     global userchannel
     
     if channelstate == True:
         if ctx.author.voice.channel != userchannel:
-            await ctx.send("**Você precisa estar no mesmo canal que o bot para usar esse comando!**")
             return
     else:
         pass
-    voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
+    voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
     voice.stop()
+    await ctx.respond('⏸︎')
+
+    
 
 
-@client.command(name='queue')
+@bot.command(description='Mostra quantas músicas estão na fila')
 async def queue_(ctx):
     global channelstate
     global userchannel
     
     if channelstate == True:
         if ctx.author.voice.channel != userchannel:
-            await ctx.send("**Você precisa estar no mesmo canal que o bot para usar esse comando!**")
             return
     else:
         pass
     if len(queue) == 1:
-        await ctx.send('**Tem {} música na fila!**'.format(len(queue)))
+        await ctx.respond('**Tem {} música na fila!**'.format(len(queue)))
     else:
-        await ctx.send('**Tem {} músicas na fila!**'.format(len(queue)))
-    await ctx.send('Se quiser limpar a fila use o comando +clear.')
+        await ctx.respond('**Tem {} músicas na fila!**'.format(len(queue)))
 
-@client.command()
+@bot.command(description='Pula a música')
 async def skip(ctx):
     global channelstate
     global userchannel
-    
+    global queue
+    global player
+
     if channelstate == True:
         if ctx.author.voice.channel != userchannel:
-            await ctx.send("**Você precisa estar no mesmo canal que o bot para usar esse comando!**")
             return
-    else:
-        pass
+    player = ''
+    voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
+    voice.stop()
+    await ctx.invoke(bot.get_command('play'), query=queue[0])
 
-    await stop(ctx)
-    try:
-        query = queue[0]
-        await play(ctx, query=query)
-    except IndexError:
-        await ctx.send('**Não tem nenhuma musica na fila!**')
 
-@client.command()
+@bot.command(description='Limpa a fila')
 async def clear(ctx):
     global queue
-    await ctx.send('**Limpei a fila!**')
+    await ctx.respond('**Limpei a fila!**')
     queue = []
     
 #Command used to diagnostics in the queue
 #Uncomment with you want to use it
 
-@client.command()
-async def status(ctx):
-    print(queue)
-    print(len(queue))
-    print(queue[0])
+#@bot.command()
+#async def status(ctx):
+#    await ctx.respond(queue)
+#    await ctx.respond(len(queue))
+#   await ctx.respond(queue[0])
 
-
-
-@client.command()
-async def next(ctx):
-    global channelstate
-    global userchannel
-    
-    if channelstate == True:
-        if ctx.author.voice.channel != userchannel:
-            await ctx.send("**Você precisa estar no mesmo canal que o bot para usar esse comando!**")
-            return
-    else:
-        pass
-
-    await stop(ctx)
-    try:
-        query = queue[0]
-        await play(ctx, query=query)
-    except IndexError:
-        await ctx.send('**Não tem nenhuma musica na fila!**')
 
 
 #Add a function that makes the bot exit a channel if it's alone.
-@client.event
+@bot.event
 async def on_voice_state_update(member, before, after):
     if member.bot:
         return
     if before.channel is None and after.channel is not None:
         return
     if before.channel is not None and after.channel is None:
-        voice_client = discord.utils.get(client.voice_clients, guild=member.guild)
+        voice_client = discord.utils.get(bot.voice_clients, guild=member.guild)
         if voice_client is not None and len(before.channel.members) == 1:
             await voice_client.disconnect()
 
+
+
 # Copy your bot token in the parentesis
 # Do no remove the ''
-client.run('TOKEN')
+bot.run("TOKEN")
