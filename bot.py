@@ -261,4 +261,4 @@ async def on_voice_state_update(member, before, after):
 
 # Copy your bot token in the parentesis
 # Do no remove the ''
-bot.run("ODg4NjIzNDE0NzEyMDk4ODg2.Glz98_.Oj8EKIL5L620wvgAmGK5vNh0fV8t4yXB5BBJb8")
+bot.run("TOKEN")
