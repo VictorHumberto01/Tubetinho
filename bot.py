@@ -143,7 +143,10 @@ async def play(ctx: object, *, query: str):
 @bot.command(description='Remove o bot da call')
 async def leave(ctx):
     global channelstate
+    global voice_channel
     global userchannel
+    global queue
+    global playing
     
     if channelstate == True:
         if ctx.author.voice.channel != userchannel:
@@ -158,7 +161,10 @@ async def leave(ctx):
     if voice.is_connected():
         await voice.disconnect()
         channelstate = False
+        voice_channel = ''
+        playing = False
         userchannel = ()
+        queue = []
     else:
         await ctx.respond('Eu não estou conectado a nenhum canal')
 
@@ -231,6 +237,12 @@ async def clear(ctx):
 #Add a function that makes the bot exit a channel if it's alone.
 @bot.event
 async def on_voice_state_update(member, before, after):
+    global channelstate
+    global voice_channel
+    global userchannel
+    global queue
+    global playing
+
     if member.bot:
         return
     if before.channel is None and after.channel is not None:
@@ -239,9 +251,14 @@ async def on_voice_state_update(member, before, after):
         voice_client = discord.utils.get(bot.voice_clients, guild=member.guild)
         if voice_client is not None and len(before.channel.members) == 1:
             await voice_client.disconnect()
+            channelstate = False
+            voice_channel = ''
+            playing = False
+            userchannel = ()
+            queue = []
 
 
 
 # Copy your bot token in the parentesis
 # Do no remove the ''
-bot.run("TOKEN")
+bot.run("ODg4NjIzNDE0NzEyMDk4ODg2.Glz98_.Oj8EKIL5L620wvgAmGK5vNh0fV8t4yXB5BBJb8")
