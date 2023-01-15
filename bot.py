@@ -101,10 +101,13 @@ async def play(ctx: object, *, query: str):
         
     voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
         
+    
+    
     # Connects to the user channel if not connected to other channel
     channel = ctx.author.voice.channel
     if channelstate == False:
         await channel.connect()
+        await ctx.respond('**Conectando ao seu canal.**')
         userchannel = channel
         channelstate == True
         files
@@ -115,9 +118,11 @@ async def play(ctx: object, *, query: str):
     try:
         if url not in queue:
             queue.append(url)
+            await ctx.respond('**Adicionei a música na fila!**')
+        else:
+            pass
     except IndexError:
-        if queue == []:
-            await ctx.respond('**Não tem nenhuma musica na fila!**')
+        pass
 
 
     # Will try to play the music with the parameters above
@@ -133,7 +138,7 @@ async def play(ctx: object, *, query: str):
         del queue[0]
         channelstate = True
     except Exception as e:
-        await ctx.respond('**Coloquei a música na fila!**')
+        await ctx.respond('Erro ao tocar a música')
         
             
     
@@ -207,10 +212,11 @@ async def skip(ctx):
     global userchannel
     global queue
     global player
-
+    
     if channelstate == True:
         if ctx.author.voice.channel != userchannel:
             return
+    await ctx.respond('**Pulando a música**')
     player = ''
     voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
     voice.stop()
