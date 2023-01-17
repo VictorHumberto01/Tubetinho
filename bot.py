@@ -9,7 +9,6 @@ import re
 # Imported all the components needed to make the bot work. The files one is the side script
 # used to delete the used files and keep the bot folder clean.
 
-#
 bot = discord.Bot()
 
 yt_dlp.utils.bug_reports_message = lambda: ''
@@ -87,6 +86,13 @@ async def play(ctx: object, *, query: str):
         pass
     #Check if the query is a valid URL
     match = re.match("https?://(www\.)?youtube\.com/watch\?v=\S+", query)
+
+    try:
+        await ctx.defer()
+    except Exception as e:
+        pass
+
+
     try:
         if match:
             url = query
@@ -96,10 +102,6 @@ async def play(ctx: object, *, query: str):
             pass
     except TypeError:
         await ctx.send('**Não consegui tocar a sua música.**')  
-        
-        
-        
-    voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
         
     
     
