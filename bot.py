@@ -140,7 +140,7 @@ async def play(ctx: object, *, query: str):
         del queue[0]
         channelstate = True
     except Exception as e:
-        await ctx.respond('Erro ao tocar a música')
+        pass
         
             
     
