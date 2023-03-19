@@ -144,10 +144,13 @@ async def play(ctx: object, *, query: str):
     else:
         pass
 
-    #Tries to add the url to the queue
+ #checks if the url it's in the queue if not will add it
     try:
-        queue.append(url)
-        await ctx.respond('**Adicionei a música na fila!**')
+        if url not in queue:
+            queue.append(url)
+            await ctx.respond('**Adicionei a música na fila!**')
+        else:
+            pass
     except IndexError:
         pass
 
