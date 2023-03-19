@@ -73,6 +73,34 @@ playing = False
 userchannel = ()
 queue = []
 
+
+#Function that assure that the bot will continue playing the queue after a song ends
+async def auto_play_queue(ctx):
+    global queue
+    global playing
+
+    playing = True
+
+    while True:
+        if len(queue) == 0:
+            playing = False
+            return
+
+        if ctx.voice_client is None or not ctx.voice_client.is_connected():
+            return
+
+        if ctx.voice_client.is_playing() or ctx.voice_client.is_paused():
+            await asyncio.sleep(1)
+            continue
+
+        try:
+            player = await YTDLSource.from_url(queue[0], loop=bot.loop)
+            ctx.voice_client.play(player, after=lambda e: print('Error: %s' % e))
+            await ctx.send('**Tocando agora:** {}'.format(player.title))
+            del queue[0]
+        except Exception as e:
+            pass
+
 #Play command
 @bot.command(description='Toca uma música')
 async def play(ctx: object, *, query: str):
@@ -101,7 +129,7 @@ async def play(ctx: object, *, query: str):
             url = search_and_get_url(query)  
             pass
     except TypeError:
-        await ctx.send('**Não consegui tocar a sua música.**')  
+        await ctx.send('**Erro ao tocar a sua música.**')  
         
     
     
@@ -116,13 +144,10 @@ async def play(ctx: object, *, query: str):
     else:
         pass
 
-    #checks if the url it's in the queue if not will add it
+    #Tries to add the url to the queue
     try:
-        if url not in queue:
-            queue.append(url)
-            await ctx.respond('**Adicionei a música na fila!**')
-        else:
-            pass
+        queue.append(url)
+        await ctx.respond('**Adicionei a música na fila!**')
     except IndexError:
         pass
 
@@ -139,9 +164,11 @@ async def play(ctx: object, *, query: str):
         await ctx.respond('**Tocando agora:** {}'.format(player.title))
         del queue[0]
         channelstate = True
+        playing = True
     except Exception as e:
+        await auto_play_queue(ctx)
         pass
-        
+    
             
     
 
@@ -180,6 +207,7 @@ async def leave(ctx):
 async def stop(ctx):
     global channelstate
     global userchannel
+    global playing
     
     if channelstate == True:
         if ctx.author.voice.channel != userchannel:
@@ -188,6 +216,7 @@ async def stop(ctx):
         pass
     voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
     voice.stop()
+    playing = False
     await ctx.respond('⏸︎')
 
     
@@ -265,6 +294,8 @@ async def on_voice_state_update(member, before, after):
             userchannel = ()
             queue = []
 
+
+    
 
 
 # Copy your bot token in the parentesis
