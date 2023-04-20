@@ -174,6 +174,78 @@ async def play(ctx: object, *, query: str):
     
             
     
+@bot.command(description='Toca uma música repetidamente')
+async def loop(ctx: object, *, music: str):
+    global channelstate
+    global voice_channel
+    global userchannel
+    global playing
+    if channelstate == True:
+        if ctx.author.voice.channel != userchannel:
+            return
+    else:
+        pass
+
+
+    #Check if the query is a valid URL
+    match = re.match("https?://(www\.)?youtube\.com/watch\?v=\S+", music)
+
+    try:
+        await ctx.defer()
+    except Exception as e:
+        pass
+
+
+    try:
+        if match:
+            url = music
+
+            pass
+        else:
+            url = search_and_get_url(music)  
+            pass
+    except TypeError:
+        await ctx.send('**Erro ao tocar a sua música.**')
+
+    
+    channel = ctx.author.voice.channel
+    if channelstate == False:
+        await channel.connect()
+        await ctx.respond('**Conectando ao seu canal.**')
+        await ctx.respond('**Tocarei essa música repetidamente a partir de agora.**')
+        userchannel = channel
+        channelstate = True
+        files
+    else:
+        await ctx.respond('**Tocarei essa música repetidamente a partir de agora.**')
+        pass
+
+
+    try:
+        player = await YTDLSource.from_url(url, loop=bot.loop)
+        ctx.voice_client.play(player, after=lambda e: print('Error: %s' % e))
+        playing = True
+        await ctx.send('**Tocando agora:** {}'.format(player.title))
+    except Exception as e:
+        pass
+
+    while playing:
+        if ctx.voice_client is None or not ctx.voice_client.is_connected():
+            return
+
+        if ctx.voice_client.is_playing() or ctx.voice_client.is_paused():
+            await asyncio.sleep(1)
+            continue
+
+        try:
+            player = await YTDLSource.from_url(url, loop=bot.loop)
+            ctx.voice_client.play(player, after=lambda e: print('Error: %s' % e))
+        except Exception as e:
+            pass
+
+
+
+
 
 
 
@@ -211,6 +283,7 @@ async def stop(ctx):
     global channelstate
     global userchannel
     global playing
+    global queue
     
     if channelstate == True:
         if ctx.author.voice.channel != userchannel:
@@ -219,6 +292,7 @@ async def stop(ctx):
         pass
     voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
     voice.stop()
+    queue = []
     playing = False
     await ctx.respond('⏸︎')
 
