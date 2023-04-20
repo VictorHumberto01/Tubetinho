@@ -21,7 +21,7 @@ Once you have the necessary token and the bot created, follow these steps to get
 3.  Open the `files.py` file and replace `PATH_TO_BOT_FOLDER` with the file path to the bot folder on your system.
 4.  Install the required libraries using the following command:
 
-`pip install -r requirements.txt` 
+`pip install -r requirements` 
 
 5.  Start the bot using the following command:
 
