@@ -6,7 +6,7 @@ Please note that Tubetinho is a Discord bot that requires a host computer to fun
 
 ## Getting Started
 
-To use Tubetinho, you will need to have access Discord developer portal and create a new application, in the application page copy the token provided and invite it to your server. Additionally, the bot requires Python and FFMPEG to be installed on your system.
+To use Tubetinho, you will need to have access Discord developer portal and create a new application, in the application page, copy the token provided and invite it to your server. Additionally, the bot requires Python and FFMPEG to be installed on your system.
 
 Once you have the necessary token and the bot created, follow these steps to get started:
 
