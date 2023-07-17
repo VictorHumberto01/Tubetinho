@@ -21,15 +21,15 @@ Once you have the necessary token and the bot created, follow these steps to get
 
 `python bot.py` 
 
-7.  Create a voice channel and join that channel.
-8.  Use the `/play` command followed by a YouTube link or a song title to begin playing music in the voice channel.
+6.  Create a voice channel and join that channel.
+7.  Use the `/play` command followed by a YouTube link or a song title to begin playing music in the voice channel.
 
 ## Commands
 
-Here is a list of Tubetinho's available commands:
+Here is a list of available commands:
 
 -   `/play [query]`: Plays the audio from the provided YouTube song or link in the voice channel.
 -   `/skip`: Skips the current song and plays the next song in the queue.
 -   `/queue_`: Displays the number of song in the queue.
 -   `/stop`: Stops the current song and clears the song queue.
--   `/loop [query]` : Plays the song provided in the command endlessly until the 'stop' comand is used
+-   `/loop [query]` : Plays the song provided in the command endlessly until the 'stop' comand is used.
