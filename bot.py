@@ -97,8 +97,7 @@ async def auto_play_queue(ctx):
             player = await YTDLSource.from_url(queue[0], loop=bot.loop)
             ctx.voice_client.play(player, after=lambda e: print('Error: %s' % e))
             link_text = f"[{player.title}]({queue[0]})"
-            response_text = f'**Tocando agora:** {link_text}'
-
+            response_text = f'**⏯️ Tocando agora:** {link_text}'
             embed = discord.Embed(description=response_text)
             await ctx.send(embed=embed)
             del queue[0]
@@ -169,8 +168,7 @@ async def play(ctx: object, *, query: str):
         voice_channel.play(player, after=lambda e: print('Error: %s' % e))
 
         link_text = f"[{player.title}]({queue[0]})"
-        response_text = f'**Tocando agora:** {link_text}'
-
+        response_text = f'**⏯️ Tocando agora:** {link_text}'
         embed = discord.Embed(description=response_text)
         await ctx.send(embed=embed)
         del queue[0]
@@ -234,8 +232,7 @@ async def loop(ctx: object, *, music: str):
         ctx.voice_client.play(player, after=lambda e: print('Error: %s' % e))
         playing = True
         link_text = f"[{player.title}]({url})"
-        response_text = f'**Tocando agora:** {link_text}'
-
+        response_text = f'**⏯️ Tocando agora:** {link_text}'
         embed = discord.Embed(description=response_text)
         await ctx.send(embed=embed)
     except Exception as e:
