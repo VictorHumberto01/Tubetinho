@@ -169,7 +169,7 @@ async def play(ctx: commands.Context, *, query: str):
                     pass
 
             elif url in queue:
-                await ctx.respond('**A música já está na fila!**')
+                pass
             else:
                 await ctx.respond('**Não foi possível encontrar a música.**')
                 return  # Ensure we don't proceed if the song couldn't be found
@@ -305,6 +305,7 @@ async def leave(ctx):
         playing = False
         userchannel = ()
         queue = []
+        await ctx.respond('**Me desconectei do canal**')
     else:
         await ctx.respond('Eu não estou conectado a nenhum canal')
 
@@ -405,7 +406,6 @@ async def on_voice_state_update(member, before, after):
             playing = False
             userchannel = ()
             queue = []
-
 
     
 
