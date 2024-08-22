@@ -1,10 +1,12 @@
 import asyncio
 import discord
-import yt_dlp
 import files
 from discord.ext import commands
 from youtube_search import YoutubeSearch
 import re
+import yt_dlp
+from pytube import Playlist
+
 
 # Imported all the components needed to make the bot work. The files one is the side script
 # used to delete the used files and keep the bot folder clean.
@@ -36,13 +38,30 @@ ffmpeg_options = {
 
 ytdl = yt_dlp.YoutubeDL(yt_dlp_format_options)
 
+global channelstate
+global voice_channel
+global userchannel
+channelstate = False
+voice_channel = ''
+playing = False
+userchannel = ()
+queue = []
+
+
+
 def search_and_get_url(title):
     results = YoutubeSearch(title , max_results=1).to_dict()
     for v in results:
         h = ('https://www.youtube.com' + v['url_suffix'])
         return h
 
+     
 
+def get_playlist_videos(playlist_url):
+    videosurl = Playlist(playlist_url)
+
+    for video in videosurl.videos:
+        queue.append(video.watch_url)
 
 class YTDLSource(discord.PCMVolumeTransformer):
     def __init__(self, source, *, data, volume=0.5):
@@ -64,14 +83,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         filename = data['url'] if stream else ytdl.prepare_filename(data)
         return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
 
-global channelstate
-global voice_channel
-global userchannel
-channelstate = False
-voice_channel = ''
-playing = False
-userchannel = ()
-queue = []
+
 
 
 #Function that assure that the bot will continue playing the queue after a song ends
@@ -104,82 +116,95 @@ async def auto_play_queue(ctx):
         except Exception as e:
             pass
 
-#Play command
 @bot.command(description='Toca uma música')
-async def play(ctx: object, *, query: str):
+async def play(ctx: commands.Context, *, query: str):
     global channelstate
     global userchannel
     global playing
+    global queue
+
+    playlistrep = False
+
+    # Check if the user is in a voice channel and if the bot is already connected to another channel
     if channelstate == True:
         if ctx.author.voice.channel != userchannel:
             return
     else:
         pass
-    #Check if the query is a valid URL
-    match = re.match("https?://(www\.)?youtube\.com/watch\?v=\S+", query)
 
-    try:
-        await ctx.defer()
-    except Exception as e:
-        pass
-
-
-    try:
-        if match:
-            url = query
-            pass
-        else:
-            url = search_and_get_url(query)  
-            pass
-    except TypeError:
-        await ctx.send('**Erro ao tocar a sua música.**')  
-        
-    
-    
-    # Connects to the user channel if not connected to other channel
+   
+    # Connect to the user's voice channel if not already connected
     channel = ctx.author.voice.channel
     if channelstate == False:
         await channel.connect()
         await ctx.respond('**Conectando ao seu canal.**')
         userchannel = channel
-        channelstate == True
+        channelstate = True
         files
     else:
         pass
 
- #checks if the url it's in the queue if not will add it
+    # Check if the query is a valid URL or playlist
+    link = re.match(r"https?://(www\.)?youtube\.com/watch\?v=\S+", query)
+    playlist = re.match(r'^https?://(www\.)?youtube\.com/playlist\?list=[\w-]+', query)
+ 
     try:
-        if url not in queue:
-            queue.append(url)
-            await ctx.respond('**Adicionei a música na fila!**')
+        if link:
+            url = query
+        elif playlist:
+            get_playlist_videos(query)
+            playlistrep = True
         else:
-            pass
-    except IndexError:
-        pass
+            url = search_and_get_url(query)
 
+        # Add to queue
+        if not playlistrep:
+            if url and url not in queue:
+                if playing == False:
+                        queue.append(url)
+                        await ctx.respond('**Adicionei a música na fila!**')
+                else:
+                    queue.append(url)
+                    await ctx.respond('**Adicionei a música na fila!**')
+                    pass
 
-    # Will try to play the music with the parameters above
-    # If can't send a message to the user chat
+            elif url in queue:
+                await ctx.respond('**A música já está na fila!**')
+            else:
+                await ctx.respond('**Não foi possível encontrar a música.**')
+                return  # Ensure we don't proceed if the song couldn't be found
+
+    except Exception as e:
+        await ctx.respond('**Erro ao tocar a sua música.**')
+        print(f"Error in play command: {e}")
+        return  # Prevent further execution if there's an error
+
+    # Add playlist songs to the queue
+    if playlistrep:
+        await ctx.respond('**Adicionei as suas músicas na fila!**')
+
+    
+    # Try to play the music from the queue
     try:
-        global player
-        server = ctx.guild
-        voice_channel = server.voice_client
-        player = await YTDLSource.from_url(queue[0], loop=bot.loop)
-        voice_channel.play(player, after=lambda e: print('Error: %s' % e))
+        if queue:
+            global player
+            server = ctx.guild
+            voice_channel = server.voice_client
+            player = await YTDLSource.from_url(queue[0], loop=bot.loop)
+            voice_channel.play(player, after=lambda e: print('Error: %s' % e))
 
-        link_text = f"[{player.title}]({queue[0]})"
-        response_text = f'**⏯️ Tocando agora:** {link_text}'
-        embed = discord.Embed(description=response_text)
-        await ctx.send(embed=embed)
-        del queue[0]
-        channelstate = True
-        playing = True
+            link_text = f"[{player.title}]({queue[0]})"
+            response_text = f'**⏯️ Tocando agora:** {link_text}'
+            embed = discord.Embed(description=response_text)
+            await ctx.send(embed=embed)
+            del queue[0]
+            channelstate = True
+            playing = True
     except Exception as e:
         await auto_play_queue(ctx)
         pass
     
-            
-    
+
 @bot.command(description='Toca uma música repetidamente')
 async def loop(ctx: object, *, music: str):
     global channelstate
@@ -194,7 +219,7 @@ async def loop(ctx: object, *, music: str):
 
 
     #Check if the query is a valid URL
-    match = re.match("https?://(www\.)?youtube\.com/watch\?v=\S+", music)
+    match = re.match(r"https?://(www\.)?youtube\.com/watch\?v=\S+", music)
 
     try:
         await ctx.defer()
@@ -255,9 +280,6 @@ async def loop(ctx: object, *, music: str):
 
 
 
-
-
-
 @bot.command(description='Remove o bot da call')
 async def leave(ctx):
     global channelstate
@@ -312,16 +334,20 @@ async def stop(ctx):
 async def queue_(ctx):
     global channelstate
     global userchannel
+    global queue
     
     if channelstate == True:
         if ctx.author.voice.channel != userchannel:
             return
     else:
         pass
+
     if len(queue) == 1:
         await ctx.respond('**Tem {} música na fila!**'.format(len(queue)))
     else:
         await ctx.respond('**Tem {} músicas na fila!**'.format(len(queue)))
+
+    
 
 @bot.command(description='Pula a música')
 async def skip(ctx):
@@ -353,7 +379,7 @@ async def clear(ctx):
 #async def status(ctx):
 #    await ctx.respond(queue)
 #    await ctx.respond(len(queue))
-#   await ctx.respond(queue[0])
+#    await ctx.respond(queue[0])
 
 
 
@@ -386,4 +412,4 @@ async def on_voice_state_update(member, before, after):
 
 # Copy your bot token in the parentesis
 # Do no remove the ''
-bot.run("TOKEN")
+bot.run("TOKEN GOES HERE")
