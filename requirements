@@ -1,7 +1,7 @@
 yt-dlp
 PyNaCl
-pycord
+py-cord
 asyncio
 youtube-search
 pytube
-
+ffprobe
