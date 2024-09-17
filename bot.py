@@ -8,8 +8,7 @@ import yt_dlp
 from pytube import Playlist
 
 
-# Imported all the components needed to make the bot work. The files one is the side script
-# used to delete the used files and keep the bot folder clean.
+# Imported all the components needed to make the bot work
 
 bot = discord.Bot()
 
