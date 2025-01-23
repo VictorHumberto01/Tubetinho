@@ -1,4 +1,6 @@
 # Tubetinho Bot
+## DISCLAIMER
+### This bot is not intended to be used in commercial context. I never wanted to infringe any youtube or google policy. Use at your own risk.
 
 Tubetinho is a Discord bot that allows users to play and skip YouTube music within a voice channel. This bot uses the commands `play`, `skip`, `stop`, `loop` and `queue_` to manage music playback.
 
