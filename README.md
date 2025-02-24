@@ -1,18 +1,36 @@
 # Tubetinho Bot
-## DISCLAIMER
-### This bot is not intended to be used in commercial context. I never wanted to infringe any youtube or google policy. Use at your own risk.
 
-Tubetinho is a Discord bot that allows users to play and skip YouTube music within a voice channel. This bot uses the commands `play`, `skip`, `stop`, `loop` and `queue_` to manage music playback.
+## ⚠ Disclaimer  
+**This bot is not intended for commercial use. I never intended to infringe any YouTube or Google policies. Use at your own risk.**  
+Due to the potential issues this bot may cause, I have archived this repository as it is part of my development journey.  
 
-Please note that Tubetinho is a Discord bot that requires a host computer to function. The bot will run continuously on the host computer and must be connected to the internet in order to function properly. Additionally, depending on the usage of the bot, the host computer may require adequate processing power and memory to handle the tasks performed by the bot. It is recommended to host the bot on a dedicated server or on a computer that is capable of running the bot without impacting other tasks.
+## 📌 About  
+Tubetinho is a Discord bot that allows users to play and manage YouTube music in a voice channel. It supports commands for playback, queue management, and looping songs.  
+
+## 🎵 Commands  
+
+- **`/play [query]`** → Plays audio from a YouTube song based on the provided search or link.  
+- **`/skip`** → Skips the current song and plays the next one in the queue.  
+- **`/queue_`** → Displays the number of songs in the queue.  
+- **`/stop`** → Stops playback and clears the queue.  
+- **`/loop [query]`** → Plays the specified song on loop until the `/stop` command is used.  
+
+---
+
+# Tubetinho Bot (Português)  
+
+## ⚠ Aviso  
+**Este bot não deve ser utilizado para fins comerciais. Nunca tive a intenção de infringir qualquer política do YouTube ou do Google. Use por sua conta e risco.**  
+Devido aos possíveis problemas que este bot pode causar, arquivei este repositório, pois faz parte da minha trajetória como desenvolvedor.  
+
+## 📌 Sobre  
+O Tubetinho é um bot para Discord que permite tocar e gerenciar músicas do YouTube em um canal de voz. Ele suporta comandos para reprodução, controle da fila e looping de músicas.  
 
 
-## Commands
+## 🎵 Comandos  
 
-Here is a list of available commands:
-
--   `/play [query]`: Plays the audio from the provided YouTube song or link in the voice channel.
--   `/skip`: Skips the current song and plays the next song in the queue.
--   `/queue_`: Displays the number of song in the queue.
--   `/stop`: Stops the current song and clears the song queue.
--   `/loop [query]` : Plays the song provided in the command endlessly until the 'stop' comand is used.
+- **`/play [query]`** → Reproduz o áudio de uma música do YouTube com base na pesquisa ou link fornecido.  
+- **`/skip`** → Pula a música atual e toca a próxima da fila.  
+- **`/queue_`** → Exibe o número de músicas na fila.  
+- **`/stop`** → Para a reprodução e limpa a fila de músicas.  
+- **`/loop [query]`** → Reproduz a música especificada em loop até que o comando `/stop` seja utilizado.  
